@@ -23,4 +23,6 @@ node make_course.js ../materials
 node make_course_docx.js ../materials
 ```
 
-問題や解説を直すときは `data.js` / `img_data.js` を、章の順番や演習の区切り・目安時間を変えるときは `course.js` を編集して再生成してください。
+問題や解説を直すときは `data.js` / `img_data.js` を、章の順番・講義回・演習の区切りを変えるときは `course.js` を編集して再生成してください。
+
+時間の目安は `course.js` の `pace`（1問あたりの分数）から自動計算します。
