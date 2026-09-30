@@ -3,9 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const pptxgen = require("pptxgenjs");
 const sharp = require("sharp");
-const DATA = require("./data");
-const IMG = require("./img_data");
-const COURSE = require("./course");
+const { COURSE, expand } = require("./course_seq");
 const L = require("./slides_lib");
 const { F, NAVY, TEAL, ICE, ACC, ACC_BG, INK, MUTED, fitSize } = L;
 
@@ -13,16 +11,11 @@ const OUT = process.argv[2] || ".";
 const IMG_DIR = path.join(__dirname, "images");
 const TEACHER_NOTES = JSON.parse(fs.readFileSync(path.join(__dirname, "img_notes.json"), "utf8"));
 
-// テーマ内の通し番号で基礎問題を取り出す
-function baseQs(themeId, from, to) {
-  const all = DATA.find((t) => t.id === themeId).sections.flatMap((s) => s.qs);
-  return all.slice(from - 1, to).map((q, i) => ({ ...q, origin: `${themeId}-[${from + i}]` }));
-}
-
 async function imgInfo(file) {
   const p = path.join(IMG_DIR, file);
   const m = await sharp(p).metadata();
-  return { data: "image/png;base64," + fs.readFileSync(p).toString("base64"), w: m.width, h: m.height };
+  const jpg = await sharp(p).flatten({ background: "#ffffff" }).jpeg({ quality: 85 }).toBuffer();
+  return { data: "image/jpeg;base64," + jpg.toString("base64"), w: m.width, h: m.height };
 }
 
 function contain(info, x, y, w, h) {
@@ -144,6 +137,21 @@ function subDivider(pres, label, chName) {
   s.addText(label, { x: 0.6, y: 2.4, w: 8.8, h: 0.8, fontFace: F, fontSize: 30, bold: true, color: NAVY, margin: 0, isTextBox: true });
 }
 
+function solveSlide(pres, b, chName) {
+  const s = pres.addSlide();
+  s.background = { color: "FFFFFF" };
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 0.5, y: 0.5, w: 9, h: 4.6, rectRadius: 0.15, fill: { color: ICE }, line: { type: "none" } });
+  s.addText(`演習 ${b.no}`, { x: 0.9, y: 0.85, w: 4, h: 0.5, fontFace: F, fontSize: 20, bold: true, color: TEAL, margin: 0, isTextBox: true });
+  s.addText(chName, { x: 0.9, y: 1.35, w: 8.2, h: 0.4, fontFace: F, fontSize: 14, color: MUTED, margin: 0, isTextBox: true });
+  s.addText(`問題 [${b.first}] 〜 [${b.last}] を解きましょう`, { x: 0.9, y: 1.95, w: 8.2, h: 0.9, fontFace: F, fontSize: 32, bold: true, color: NAVY, margin: 0, isTextBox: true });
+  const kinds = [b.base ? `基礎 ${b.base}問` : "", b.img ? `画像 ${b.img}問` : ""].filter(Boolean).join("・");
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 0.9, y: 3.2, w: 2.6, h: 1.3, rectRadius: 0.1, fill: { color: NAVY }, line: { type: "none" } });
+  s.addText([{ text: "目安", options: { fontSize: 13, breakLine: true } }, { text: `${b.minutes}分`, options: { fontSize: 30, bold: true } }],
+    { x: 0.9, y: 3.2, w: 2.6, h: 1.3, align: "center", valign: "middle", fontFace: F, color: "FFFFFF", margin: 0, isTextBox: true });
+  s.addText([{ text: `${b.last - b.first + 1}問（${kinds}）`, options: { bold: true, breakLine: true } }, { text: "配布プリントに解答を記入。終わったら解説に進みます。" }],
+    { x: 3.8, y: 3.2, w: 5.3, h: 1.3, valign: "middle", fontFace: F, fontSize: 15, color: INK, margin: 0, isTextBox: true });
+}
+
 function answerListSlides(pres, list) {
   const per = 45;
   for (let p = 0; p * per < list.length; p++) {
@@ -166,17 +174,7 @@ function answerListSlides(pres, list) {
 }
 
 async function build() {
-  // 章ごとの問題リストを作る
-  const chs = COURSE.chapters.map((ch) => {
-    const seq = [];
-    for (const it of ch.items) {
-      if (it[0] === "base") baseQs(it[1], it[2], it[3]).forEach((q) => seq.push({ type: "base", q }));
-      else if (it[0] === "img") seq.push({ type: "img", id: it[1], q: IMG[it[1]] });
-      else seq.push({ type: "sub", label: it[1] });
-    }
-    return { ...ch, seq, count: seq.filter((e) => e.type !== "sub").length };
-  });
-  const total = chs.reduce((a, c) => a + c.count, 0);
+  const { chapters: chs, total } = expand();
   const counts = { 基礎: 0, 画像: 0 };
   chs.forEach((c) => c.seq.forEach((e) => { if (e.type === "base") counts["基礎"]++; if (e.type === "img") counts["画像"]++; }));
 
@@ -186,18 +184,19 @@ async function build() {
   coverSlide(pres, total, counts);
   roadmapSlide(pres, chs);
 
-  let n = 0;
   const answers = [];
   for (let i = 0; i < chs.length; i++) {
-    const ch = chs[i];
-    chapterDivider(pres, i, ch, n + 1, n + ch.count);
-    for (const sm of ch.summaries) (sm.cards ? L.cardSlide : L.tableSlide)(pres, sm);
+    const ch = chs[i], label = `第${i + 1}章　${ch.name}`;
+    chapterDivider(pres, i, ch, ch.first, ch.last);
     for (const e of ch.seq) {
-      if (e.type === "sub") { subDivider(pres, e.label, `第${i + 1}章　${ch.name}`); continue; }
-      n++;
-      if (e.type === "base") { await L.questionSlide(pres, e.q, n); await L.answerSlide(pres, e.q, n); }
-      else { await imgQuestionSlide(pres, e.q, n); await imgAnswerSlide(pres, e.q, n, e.id); }
-      answers.push({ n, img: e.type === "img", ans: e.q.ans.join("・") });
+      if (e.type === "solve") solveSlide(pres, e.block, label);
+      else if (e.type === "sm") (e.sm.cards ? L.cardSlide : L.tableSlide)(pres, e.sm);
+      else if (e.type === "sub") subDivider(pres, e.label, label);
+      else {
+        if (e.type === "base") { await L.questionSlide(pres, e.q, e.n); await L.answerSlide(pres, e.q, e.n); }
+        else { await imgQuestionSlide(pres, e.q, e.n); await imgAnswerSlide(pres, e.q, e.n, e.id); }
+        answers.push({ n: e.n, img: e.type === "img", ans: e.q.ans.join("・") });
+      }
     }
   }
   answerListSlides(pres, answers);

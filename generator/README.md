@@ -10,7 +10,9 @@
 - `figures.js` … 模式図（Penfield 感覚野・中脳横断面）
 - `slides_lib.js` … スライド共通部品
 - `make_docx.js` / `make_pptx.js` … テーマ別の Word・PPT を生成
+- `course_seq.js` … 章立てを展開して通し番号・演習ブロックを作る（PPT・Word共通）
 - `make_course.js` … 統合版 PPT（基礎＋画像問題）を生成
+- `make_course_docx.js` … 統合版の学生配布用 Word（問題のみ・解答欄付き）を生成
 
 ```bash
 cd generator
@@ -18,6 +20,7 @@ npm install docx pptxgenjs sharp
 node make_docx.js ../materials
 node make_pptx.js ../materials
 node make_course.js ../materials
+node make_course_docx.js ../materials
 ```
 
-問題や解説を直すときは `data.js` / `img_data.js` を、章の順番を変えるときは `course.js` を編集して再生成してください。
+問題や解説を直すときは `data.js` / `img_data.js` を、章の順番や演習の区切り・目安時間を変えるときは `course.js` を編集して再生成してください。
