@@ -1,4 +1,5 @@
 // 解説スライド共通部品
+const TALK = require("./talk");
 const FIG = require("./figures");
 
 const F = "Meiryo";
@@ -31,6 +32,7 @@ function coverSlide(pres, theme, total) {
   s.addText(`テーマ ${theme.id}`, { x: 0.6, y: 1.8, w: 8, h: 0.5, fontFace: F, fontSize: 20, bold: true, color: "FFFFFF", margin: 0, isTextBox: true });
   s.addText(theme.title, { x: 0.6, y: 2.3, w: 8.5, h: 1.0, fontFace: F, fontSize: 40, bold: true, color: "FFFFFF", margin: 0, isTextBox: true });
   s.addText(`解説スライド　全${total}問`, { x: 0.6, y: 3.5, w: 8, h: 0.4, fontFace: F, fontSize: 16, color: "BFD7EA", margin: 0, isTextBox: true });
+  s.addNotes(TALK.themeCover(theme, total));
 }
 
 function dividerSlide(pres, label, sub) {
@@ -38,6 +40,7 @@ function dividerSlide(pres, label, sub) {
   s.background = { color: TEAL };
   s.addText(label, { x: 0.6, y: 2.0, w: 8.8, h: 0.9, fontFace: F, fontSize: 40, bold: true, color: "FFFFFF", margin: 0, isTextBox: true });
   if (sub) s.addText(sub, { x: 0.6, y: 2.9, w: 8.8, h: 0.5, fontFace: F, fontSize: 16, color: "E6F2F7", margin: 0, isTextBox: true });
+  s.addNotes(TALK.themeDivider(label, sub));
 }
 
 // まとめスライド：表形式
@@ -54,6 +57,7 @@ function tableSlide(pres, sm) {
     border: { type: "solid", pt: 0.75, color: "C9D6E0" }, valign: "middle", rowH: sm.rowH || 0.3, margin: 0.04,
   });
   if (sm.note) s.addText(sm.note, { x: 0.5, y: 5.05, w: 9, h: 0.35, fontFace: F, fontSize: 11, color: ACC, bold: true, margin: 0, isTextBox: true });
+  s.addNotes(TALK.summary(sm));
 }
 
 // まとめスライド：カード形式
@@ -73,6 +77,7 @@ function cardSlide(pres, sm) {
     });
   });
   if (sm.note) s.addText(sm.note, { x: 0.5, y: 5.1, w: 9, h: 0.35, fontFace: F, fontSize: 11, color: ACC, bold: true, margin: 0, isTextBox: true });
+  s.addNotes(TALK.summary(sm));
 }
 
 function qHeader(s, pres, q, n, tag) {
@@ -100,6 +105,7 @@ async function questionSlide(pres, q, n) {
     const h = 3.2, ww = h * fw / fh;
     s.addImage({ data: "image/png;base64," + (await FIG[q.fig](false)).toString("base64"), x: 5.95 + (3.55 - ww) / 2, y: 1.65, w: ww, h });
   }
+  s.addNotes(TALK.baseQuestion(q, n));
 }
 
 async function answerSlide(pres, q, n) {
@@ -134,6 +140,7 @@ async function answerSlide(pres, q, n) {
     s.addText([{ text: "POINT　", options: { bold: true, color: TEAL } }, { text: q.point, options: { color: INK } }],
       { x: 2.4, y: yb, w: 7.0, h: 0.75, valign: "middle", fontFace: F, fontSize: fitSize("POINT　" + q.point, 7.0, 0.75, 12), margin: 0, isTextBox: true });
   }
+  s.addNotes(TALK.baseAnswer(q, n));
 }
 
 module.exports = { F, NAVY, TEAL, ICE, ACC, ACC_BG, INK, MUTED, fitSize, title, coverSlide, dividerSlide, tableSlide, cardSlide, qHeader, questionSlide, answerSlide };

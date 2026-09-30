@@ -5,6 +5,7 @@ const pptxgen = require("pptxgenjs");
 const sharp = require("sharp");
 const { COURSE, expand } = require("./course_seq");
 const L = require("./slides_lib");
+const TALK = require("./talk");
 const { F, NAVY, TEAL, ICE, ACC, ACC_BG, INK, MUTED, fitSize } = L;
 
 const OUT = process.argv[2] || ".";
@@ -55,6 +56,7 @@ async function imgQuestionSlide(pres, q, n) {
     numCircle(s, pres, x + 0.08, y + 0.07, 0.32, i + 1, false);
     s.addText(c, { x: x + 0.5, y, w: w - 0.58, h: rowH, valign: "middle", fontFace: F, fontSize: fitSize(c, w - 0.58, rowH, 13), color: INK, margin: 0, isTextBox: true });
   });
+  s.addNotes(TALK.imgQuestion(q, n));
 }
 
 async function imgAnswerSlide(pres, q, n, id) {
@@ -88,8 +90,8 @@ async function imgAnswerSlide(pres, q, n, id) {
   s.addText([{ text: "POINT　", options: { bold: true, color: TEAL } }, { text: q.point, options: { color: INK } }],
     { x: 2.4, y: yb, w: 7.0, h: 0.75, valign: "middle", fontFace: F, fontSize: fitSize("POINT　" + q.point, 7.0, 0.75, 12), margin: 0, isTextBox: true });
   // 発表者ノート：元資料の解説メモ
-  let notes = "";
-  if (TEACHER_NOTES[id]) notes += "【元資料（画像問題編）の解説メモ】\n" + TEACHER_NOTES[id];
+  let notes = TALK.imgAnswer(q, n);
+  if (TEACHER_NOTES[id]) notes += "\n\n【元資料（画像問題編）の解説メモ】\n" + TEACHER_NOTES[id];
   if (q.fix) notes += (notes ? "\n\n" : "") + "【補足】" + q.fix;
   if (notes) s.addNotes(notes);
 }
@@ -103,6 +105,7 @@ function coverSlide(pres, total, counts) {
   s.addText(COURSE.title, { x: 0.6, y: 1.6, w: 8.5, h: 1.0, fontFace: F, fontSize: 40, bold: true, color: "FFFFFF", margin: 0, isTextBox: true });
   s.addText(COURSE.subtitle, { x: 0.6, y: 2.6, w: 8.5, h: 0.5, fontFace: F, fontSize: 18, color: "FFFFFF", margin: 0, isTextBox: true });
   s.addText(`全${total}問（基礎 ${counts["基礎"]}問・画像 ${counts["画像"]}問）`, { x: 0.6, y: 3.4, w: 8, h: 0.4, fontFace: F, fontSize: 16, color: "BFD7EA", margin: 0, isTextBox: true });
+  s.addNotes(TALK.cover(COURSE.title, total));
 }
 
 // ブロックの短い名前（小見出しがあればそれを使う）
@@ -129,6 +132,7 @@ function roadmapSlide(pres, lectures) {
       s.addText(t, { x: x + 0.67, y: yy + 0.26, w: w - 0.8, h: 0.56, valign: "top", fontFace: F, fontSize: fitSize(t, w - 0.8, 0.56, 12, 9), color: INK, margin: 0, isTextBox: true });
     });
   });
+  s.addNotes(TALK.roadmap(lectures, shortLabel));
 }
 
 // 各回の最初：その回の流れ
@@ -148,6 +152,7 @@ function lectureSlide(pres, l) {
     { text: `約${b.explain}分`, options: { align: "center" } },
   ].map((c) => ({ text: c.text, options: { color: INK, fill: { color: "FFFFFF" }, ...(c.options || {}) } })));
   s.addTable([hdr, ...rows], { x: 0.6, y: 2.25, w: 8.8, colW: [1.0, 4.4, 1.4, 1.0, 1.0], rowH: 0.55, fontFace: F, fontSize: 13, valign: "middle", border: { type: "solid", pt: 0.75, color: "C9D6E0" } });
+  s.addNotes(TALK.lecture(l, shortLabel));
 }
 
 function chapterDivider(pres, i, ch, first, last) {
@@ -157,6 +162,7 @@ function chapterDivider(pres, i, ch, first, last) {
   s.addText(ch.name, { x: 0.6, y: 2.0, w: 8.8, h: 1.0, fontFace: F, fontSize: fitSize(ch.name, 8.8, 1.0, 36), bold: true, color: "FFFFFF", margin: 0, isTextBox: true });
   s.addText(ch.lead, { x: 0.6, y: 3.1, w: 8.8, h: 0.45, fontFace: F, fontSize: 16, color: "FFFFFF", margin: 0, isTextBox: true });
   s.addText(`問題 [${first}]〜[${last}]`, { x: 0.6, y: 3.65, w: 8.8, h: 0.4, fontFace: F, fontSize: 14, color: "E6F2F7", margin: 0, isTextBox: true });
+  s.addNotes(TALK.chapter(i, ch));
 }
 
 function subDivider(pres, label, chName) {
@@ -164,6 +170,7 @@ function subDivider(pres, label, chName) {
   s.background = { color: ICE };
   s.addText(chName, { x: 0.6, y: 2.0, w: 8.8, h: 0.4, fontFace: F, fontSize: 14, color: TEAL, bold: true, margin: 0, isTextBox: true });
   s.addText(label, { x: 0.6, y: 2.4, w: 8.8, h: 0.8, fontFace: F, fontSize: 30, bold: true, color: NAVY, margin: 0, isTextBox: true });
+  s.addNotes(TALK.sub(label, chName));
 }
 
 function solveSlide(pres, b, chName) {
@@ -181,6 +188,7 @@ function solveSlide(pres, b, chName) {
   });
   s.addText([{ text: `${b.count}問（${kinds}）`, options: { bold: true, breakLine: true } }, { text: "配布プリントに解答を記入。終わったら解説に進みます。" }],
     { x: 4.7, y: 3.2, w: 4.4, h: 1.3, valign: "middle", fontFace: F, fontSize: 14, color: INK, margin: 0, isTextBox: true });
+  s.addNotes(TALK.solve(b));
 }
 
 function answerListSlides(pres, list) {
@@ -190,6 +198,7 @@ function answerListSlides(pres, list) {
     const s = pres.addSlide();
     s.background = { color: "FFFFFF" };
     L.title(s, `正答一覧（${p + 1}/${Math.ceil(list.length / per)}）`, "★＝画像問題");
+    s.addNotes(TALK.answerList(p + 1, Math.ceil(list.length / per)));
     const cols = 5, rows = Math.ceil(part.length / cols), tbl = [];
     for (let r = 0; r < rows; r++) {
       const row = [];

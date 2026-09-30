@@ -9,6 +9,7 @@
 - `summary.js` … テーマ別版の要点まとめスライド
 - `figures.js` … 模式図（Penfield 感覚野・中脳横断面）
 - `slides_lib.js` … スライド共通部品
+- `talk.js` … 発表者ノート（喋るメモ）の文面（スライドの内容から自動生成）
 - `make_docx.js` / `make_pptx.js` … テーマ別の Word・PPT を生成
 - `course_seq.js` … 章立てを展開して通し番号・演習ブロックを作る（PPT・Word共通）
 - `make_course.js` … 統合版 PPT（基礎＋画像問題）を生成

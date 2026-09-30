@@ -25,6 +25,7 @@ async function build(theme) {
   const s = pres.addSlide();
   s.background = { color: "FFFFFF" };
   title(s, "正答一覧", `テーマ ${theme.id}　${theme.title}`);
+  s.addNotes(require("./talk").themeAnswerList(theme));
   const all = theme.sections.flatMap((x) => x.qs);
   const cols = 5, rows = Math.ceil(all.length / cols);
   const tbl = [];
