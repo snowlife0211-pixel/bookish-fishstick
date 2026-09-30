@@ -99,7 +99,7 @@ function coverSlide(pres, total, counts) {
   s.background = { color: NAVY };
   s.addShape(pres.shapes.OVAL, { x: 6.6, y: -1.2, w: 5, h: 5, fill: { color: TEAL, transparency: 55 }, line: { type: "none" } });
   s.addShape(pres.shapes.OVAL, { x: 7.8, y: 3.0, w: 3.2, h: 3.2, fill: { color: TEAL, transparency: 75 }, line: { type: "none" } });
-  s.addText("作業療法士国家試験対策", { x: 0.6, y: 1.1, w: 8, h: 0.4, fontFace: F, fontSize: 14, color: "BFD7EA", margin: 0, isTextBox: true });
+  s.addText(COURSE.course, { x: 0.6, y: 1.1, w: 8, h: 0.4, fontFace: F, fontSize: 14, color: "BFD7EA", margin: 0, isTextBox: true });
   s.addText(COURSE.title, { x: 0.6, y: 1.6, w: 8.5, h: 1.0, fontFace: F, fontSize: 40, bold: true, color: "FFFFFF", margin: 0, isTextBox: true });
   s.addText(COURSE.subtitle, { x: 0.6, y: 2.6, w: 8.5, h: 0.5, fontFace: F, fontSize: 18, color: "FFFFFF", margin: 0, isTextBox: true });
   s.addText(`全${total}問（基礎 ${counts["基礎"]}問・画像 ${counts["画像"]}問）`, { x: 0.6, y: 3.4, w: 8, h: 0.4, fontFace: F, fontSize: 16, color: "BFD7EA", margin: 0, isTextBox: true });

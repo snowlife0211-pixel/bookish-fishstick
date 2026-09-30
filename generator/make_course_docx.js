@@ -106,14 +106,14 @@ function planTable(chs, blocks) {
 
 async function build() {
   const { chapters: chs, blocks, total } = expand();
-  const header = new Header({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [run(`作業療法士国家試験対策　${COURSE.title}`, { size: 16, color: "808080" })] })] });
+  const header = new Header({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [run(`${COURSE.course}　${COURSE.title}`, { size: 16, color: "808080" })] })] });
   const footer = new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 16, color: "808080" })] })] });
   const hf = { headers: { default: header }, footers: { default: footer } };
   const sections = [];
 
   // 表紙
   sections.push({ properties: { page: PAGE }, ...hf, children: [
-    new Paragraph({ spacing: { before: 600, after: 80 }, children: [run("作業療法士国家試験対策", { size: 24, color: "595959" })] }),
+    new Paragraph({ spacing: { before: 600, after: 80 }, children: [run(COURSE.course, { size: 24, color: "595959" })] }),
     new Paragraph({ spacing: { after: 80 }, children: [run(COURSE.title, { size: 52, bold: true, color: NAVY })] }),
     new Paragraph({ spacing: { after: 300 }, children: [run(`${COURSE.subtitle}　全${total}問`, { size: 24 })] }),
     new Paragraph({ spacing: { after: 300 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: NAVY, space: 4 } },

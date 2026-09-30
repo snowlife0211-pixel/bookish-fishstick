@@ -6,6 +6,7 @@
 const SUMMARY = require("./summary");
 
 module.exports = {
+  course: "画像診断学（神経系）",
   title: "神経系 総合演習",
   subtitle: "基礎（構造と機能）から画像問題（臨床）まで",
   chapters: [
