@@ -100,7 +100,7 @@ module.exports = {
       name: "自律神経（交感神経・副交感神経）", kind: "基礎",
       lead: "構造（起始・線維・伝達物質）と各臓器への作用を整理する",
       summaries: SUMMARY["04"]["_"],
-      items: [["solve", 30], ["base", "04", 1, 30]],
+      items: [["solve", 15], ["sm", 0], ["sm", 1], ["base", "04", 1, 15], ["solve", 15], ["base", "04", 16, 30]],
     },
     {
       name: "脳卒中リハ：評価とリスク管理", kind: "画像",
